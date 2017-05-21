@@ -1,0 +1,17 @@
+3d121b0fc4ee3c2722982523c620f061 *DESCRIPTION
+b0a807b3e4db7c414ea2221b30580d0b *NAMESPACE
+e2f3a0bb1fc50d8a6429323ac52c4bad *R/Adjacency.R
+e35c14fb382b57e628717612d9a04210 *R/ElasticLogistic.R
+0869a8e6c81510b15aaa7bf1150651b3 *R/McpLogistic.R
+019b6d38a99473eeef3961f92ad17e59 *R/NetworkLogistic.R
+99aa6e54f6a4c95f7db20438b384418c *R/regnet.R
+7a2eb14418bea4923a180f8e0ec2cc50 *R/shared.R
+6db0ce5a0ab2b55d26063bd2b9dab97e *README.md
+81f2a78ead4a15225b0926dc1306e504 *data/regnet.rda
+6a71ae4b3a59e79231d5f844cc61c0c2 *man/CV.ElasLogistic.Rd
+372e688f0022a980d2ac771bed00cf8b *man/CV.McpLogistic.Rd
+dbc4de9001988b1ce203b8a03a6c524d *man/CV.NetLogistic.Rd
+7ba68b3cc6e21c72253d54fd1ff09df1 *man/ElasLogistic.Rd
+8eec24eb2360196bc20d038ff4c15010 *man/McpLogistic.Rd
+999415c6e24e6f8d46193cd4510f8693 *man/NetLogistic.Rd
+397224964190ad7db354d9107fdfc3fd *man/regnet.Rd
