@@ -11,9 +11,9 @@ NetLogistic(X, Y, lamb.1, lamb.2, alpha.i = 1, r = 5, folds = 5)
 
 \item{Y}{a vector of the binary response.}
 
-\item{lamb.1}{the tunning parameter lambda1 imposes sparsity.}
+\item{lamb.1}{the tuning parameter lambda1 imposes sparsity.}
 
-\item{lamb.2}{the tunning parameter lambda2 controls the smoothness among coefficient profiles.}
+\item{lamb.2}{the tuning parameter lambda2 controls the smoothness among coefficient profiles.}
 
 \item{alpha.i}{by default, the program use the elastic-net for choosing initial values of
 the coefficient vector. alpha.i is the elastic-net mixing parameter, with \eqn{0 \le alpha.i \le 1}. alpha.i=1 is the
@@ -38,7 +38,7 @@ regnet$beta
 }
 \references{
 Ren, J., He, T., Li, Y., Liu, S., Du, Y., Jiang, Y., Wu, C. (2017).
-Network-based regularization for high dimensional SNP data in the case /– control study of
+Network-based regularization for high dimensional SNP data in the case – control study of
 Type 2 diabetes. BMC Genetics.
 }
 \seealso{
