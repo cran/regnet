@@ -2,7 +2,7 @@
 % Please edit documentation in R/ElasticLogistic.R
 \name{ElasLogistic}
 \alias{ElasLogistic}
-\title{Elastic-net logistic regression for a given lambda.}
+\title{Elastic-Net logistic regression for a given lambda.}
 \usage{
 ElasLogistic(X, Y, lambda, alpha = 0.5, alpha.i = 1, folds = 5)
 }
@@ -11,13 +11,13 @@ ElasLogistic(X, Y, lambda, alpha = 0.5, alpha.i = 1, folds = 5)
 
 \item{Y}{a vector of the binary response.}
 
-\item{lambda}{the tuning parameter lambda imposes sparsity.}
+\item{lambda}{the tuning parameter that imposes sparsity.}
 
-\item{alpha}{the elasticnet mixing parameter, with \eqn{0 \le \alpha \le 1}. alpha=1 is the lasso penalty, and alpha=0 the ridge penalty.}
+\item{alpha}{the Elastic-Net mixing parameter, with \eqn{0 \le \alpha \le 1}. alpha=1 is the lasso penalty, and alpha=0 the ridge penalty.}
 
 \item{alpha.i}{by default, the program use the lasso for choosing initial values of
-the coefficient vector. alpha.i is the elastic-net mixing parameter, with \eqn{0 \le alpha.i \le 1}. alpha.i=1 is the
-lasso penalty, and alpha.i=0 the ridge penalty. If assign alpha.i to be -1, program will use zero
+the coefficient vector. alpha.i is the Elastic-Net mixing parameter, with \eqn{0 \le alpha.i \le 1}. alpha.i=1 is the
+lasso penalty, and alpha.i=0 the ridge penalty. If alpha.i is assigned as -1, the program will use zeroes
 as initial coefficients.}
 
 \item{folds}{the number of folds for cross-validation.}
@@ -26,13 +26,21 @@ as initial coefficients.}
 the estimated coefficients vector.
 }
 \description{
-This function makes predictions for elastic-net logistic for a given value of lambda.
+This function makes predictions for Elastic-Net logistic regression for a given value of lambda.
 Typical usage is to have the CV.ElasLogistic function compute the optimal lambda, then provide it to
 the ElasLogistic function.
 }
 \examples{
 b = ElasLogistic(regnet$X, regnet$Y, 0.04)
-regnet$beta  # the true coefficient
+inds = which(regnet$beta != 0)
+sel = which(b != 0)
+tp = length(intersect(inds, sel))
+fp = length(sel) - tp
+list(tp=tp, fp=fp)
+}
+\references{
+Zou H, Hastie T. (2005). Regularization and variable selection via the elastic net.
+J.R. Statist.Soc.B, 67(2):301–20.
 }
 \seealso{
 \code{\link{CV.ElasLogistic}}

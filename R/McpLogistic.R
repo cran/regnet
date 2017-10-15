@@ -1,27 +1,31 @@
 #' k-folds cross-validation for MCP logistic regression.
 #'
-#' This function dose k-fold cross-validation for the MCP logistic regression and returns
-#' a value of lambda.
+#' This function does k-fold cross-validation for the MCP logistic regression and returns
+#' the optimal value of lambda.
 #'
 #' @param X a matrix of predictors.
 #' @param Y a vector of the binary response.
-#' @param lambda a user-supplied sequence of lambda. Tuning parameter lambda imposes sparsity.
+#' @param lambda a user-supplied sequence of lambda values, which serves as a tuning parameter to impose sparsity.
 #' If it is left as NULL, a default sequence will be used.
 #' @param r the regularization parameter in MCP.
-#' @param alpha.i by default, the program use the lasso for choosing initial values of
-#' the coefficient vector. alpha.i is the elastic-net mixing parameter, with \eqn{0 \le alpha.i \le 1}. alpha.i=1 is the
-#' lasso penalty, and alpha.i=0 the ridge penalty. If assign alpha.i to be -1, program will use zero
+#' @param alpha.i by default, the program uses the lasso penalty for choosing initial values of
+#' the coefficient vector. alpha.i is the Elastic-Net mixing parameter, with \eqn{0 \le alpha.i \le 1}. alpha.i=1 is the
+#' lasso penalty, and alpha.i=0 is the ridge penalty. If alpha.i is assigned to be -1, the program will use zeroes
 #' as initial coefficients.
 #' @param folds the number of folds for cross-validation.
+#' @param verbo output progress to the console.
 #' @return a list with components:
 #' \item{lambda}{the optimal lambda.}
 #' \item{mcr}{the misclassification rate of the optimal lambda.}
 #' \item{MCR}{a matrix of the misclassification rates for all the values of lambda tested.}
 #'
+#' @references zhang, CH. (2010). Nearly unbiased variable selection under minimax concave penalty.
+#' Annals of Statistics, 38(2):894-942.
+#'
 #' @seealso \code{\link{McpLogistic}}
 #'
 #' @export
-CV.McpLogistic <- function(X, Y, lambda=NULL, r=5, alpha.i=1, folds=5){
+CV.McpLogistic <- function(X, Y, lambda=NULL, r=5, alpha.i=1, folds=5, verbo = FALSE){
 
   if(is.null(lambda)) lambda = lambda.m
   n = nrow(X); p = ncol(X);
@@ -32,7 +36,7 @@ CV.McpLogistic <- function(X, Y, lambda=NULL, r=5, alpha.i=1, folds=5){
   tMSE = matrix(0, 1, length(lambda))
   #------------------------------------------ Main Loop ----------------------------------------------
   for(f in 1:folds){
-      cat("CrossValidation: ",f, "/", folds, "\n")
+      if(verbo) cat("CrossValidation: ",f, "/", folds, "\n")
       index = c(1: ceiling(n/folds)) + (f-1)*ceiling(n/folds)
       test = rs[intersect(index, seq(1,n,1))]
 
@@ -48,10 +52,10 @@ CV.McpLogistic <- function(X, Y, lambda=NULL, r=5, alpha.i=1, folds=5){
       n.x = nrow(x)
 
       for(i in 1:length(lambda)){# MCP
-        b = run.mcp(x, y, lambda[i], b0, r, n.x, p)
+        # b = run.mcp(x, y, lambda[i], b0, r, n.x, p)
+        b = RunMCP(x, y, lambda[i], b0, r, n.x, p)
         tMSE[1,i] = tMSE[1,i] + validation(b, x2, y2, n)
       }
-        #graph(lambda, mse.mcp, "Log MCP ",f, "/", "folds")
   }
 
   mcr = min(tMSE)
@@ -64,26 +68,33 @@ CV.McpLogistic <- function(X, Y, lambda=NULL, r=5, alpha.i=1, folds=5){
 
 #' MCP logistic regression for a given lambda.
 #'
-#' This function makes predictions for MCP logistic for a given value of lambda1.
-#' Typical usage is to have the CV.MCPLogistic function compute the optimal lambda, then provide it to
+#' This function makes predictions for MCP logistic regression for a given value of lambda.
+#' Typical usage is to have the CV.McpLogistic function compute the optimal lambda, then provide it to
 #' the McpLogistic function.
 #'
 #' @param X a matrix of predictors.
 #' @param Y a vector of the binary response.
-#' @param lambda the tuning parameter lambda imposes sparsity.
+#' @param lambda the tuning parameter that imposes sparsity.
 #' @param r the regularization parameter in MCP.
-#' @param alpha.i by default, the program use the lasso for choosing initial values of
-#' the coefficient vector. alpha.i is the elastic-net mixing parameter, with \eqn{0 \le alpha.i \le 1}. alpha.i=1 is the
-#' lasso penalty, and alpha.i=0 the ridge penalty. If assign alpha.i to be -1, program will use zero
+#' @param alpha.i by default, the program use the lasso penalty for choosing initial values of
+#' the coefficient vector. alpha.i is the Elastic-Net mixing parameter, with \eqn{0 \le alpha.i \le 1}. alpha.i=1 is the
+#' lasso penalty, and alpha.i=0 is the ridge penalty. If alpha.i is assigned to be -1, the program will use zeroes
 #' as initial coefficients.
 #' @param folds the number of folds for cross-validation.
 #' @return the estimated coefficients vector.
+#'
+#' @references zhang, CH. (2010). Nearly unbiased variable selection under minimax concave penalty.
+#' Annals of Statistics, 38(2):894-942.
 #'
 #' @seealso \code{\link{CV.McpLogistic}}
 #'
 #' @examples
 #' b = McpLogistic(regnet$X, regnet$Y, 0.075)
-#' regnet$beta # the true coefficient
+#' inds = which(regnet$beta != 0)
+#' sel = which(b != 0)
+#' tp = length(intersect(inds, sel))
+#' fp = length(sel) - tp
+#' list(tp=tp, fp=fp)
 #' @export
 McpLogistic <- function(X, Y, lambda, r=5, alpha.i=1, folds=5){
   n = nrow(X); p = ncol(X);
@@ -92,7 +103,8 @@ McpLogistic <- function(X, Y, lambda, r=5, alpha.i=1, folds=5){
   x = cbind(rep(1,n), x)
   if(alpha.i != -1) b0 = initiation(x, y, alpha.i)
   else b0 = rep(0, p+1)
-  b = run.mcp(x, y, lambda, b0, r, n, p)
+  # b = run.mcp(x, y, lambda, b0, r, n, p)
+  b = RunMCP(x, y, lambda, b0, r, n, p)
 }
 
 run.mcp <- function(x, y, lambda, b, r, n, p){

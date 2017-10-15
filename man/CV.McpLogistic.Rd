@@ -4,24 +4,27 @@
 \alias{CV.McpLogistic}
 \title{k-folds cross-validation for MCP logistic regression.}
 \usage{
-CV.McpLogistic(X, Y, lambda = NULL, r = 5, alpha.i = 1, folds = 5)
+CV.McpLogistic(X, Y, lambda = NULL, r = 5, alpha.i = 1, folds = 5,
+  verbo = FALSE)
 }
 \arguments{
 \item{X}{a matrix of predictors.}
 
 \item{Y}{a vector of the binary response.}
 
-\item{lambda}{a user-supplied sequence of lambda. Tuning parameter lambda imposes sparsity.
+\item{lambda}{a user-supplied sequence of lambda values, which serves as a tuning parameter to impose sparsity.
 If it is left as NULL, a default sequence will be used.}
 
 \item{r}{the regularization parameter in MCP.}
 
-\item{alpha.i}{by default, the program use the lasso for choosing initial values of
-the coefficient vector. alpha.i is the elastic-net mixing parameter, with \eqn{0 \le alpha.i \le 1}. alpha.i=1 is the
-lasso penalty, and alpha.i=0 the ridge penalty. If assign alpha.i to be -1, program will use zero
+\item{alpha.i}{by default, the program uses the lasso penalty for choosing initial values of
+the coefficient vector. alpha.i is the Elastic-Net mixing parameter, with \eqn{0 \le alpha.i \le 1}. alpha.i=1 is the
+lasso penalty, and alpha.i=0 is the ridge penalty. If alpha.i is assigned to be -1, the program will use zeroes
 as initial coefficients.}
 
 \item{folds}{the number of folds for cross-validation.}
+
+\item{verbo}{output progress to the console.}
 }
 \value{
 a list with components:
@@ -30,8 +33,12 @@ a list with components:
 \item{MCR}{a matrix of the misclassification rates for all the values of lambda tested.}
 }
 \description{
-This function dose k-fold cross-validation for the MCP logistic regression and returns
-a value of lambda.
+This function does k-fold cross-validation for the MCP logistic regression and returns
+the optimal value of lambda.
+}
+\references{
+zhang, CH. (2010). Nearly unbiased variable selection under minimax concave penalty.
+Annals of Statistics, 38(2):894-942.
 }
 \seealso{
 \code{\link{McpLogistic}}

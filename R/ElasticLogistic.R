@@ -1,28 +1,32 @@
-#' k-folds cross-validation for Elastic-net logistic regression.
+#' k-folds cross-validation for Elastic-Net logistic regression.
 #'
-#' This function dose k-fold cross-validation for the Elastic-net logistic regression and returns
-#' a value of lambda.
+#' This function does k-fold cross-validation for the Elastic-Net logistic regression and returns
+#' the optimal value of lambda.
 #'
 #' @param X a matrix of predictors.
 #' @param Y a vector of the binary response.
-#' @param lambda a user-supplied sequence of lambda. Tuning parameter lambda imposes sparsity.
+#' @param lambda a user-supplied sequence of lambda values, which serves as a tuning parameter to impose sparsity.
 #' If it is left as NULL, a default sequence will be used.
-#' @param alpha the elastic-net mixing parameter, with \eqn{0 \le \alpha \le 1}. alpha=1 is the lasso penalty,
-#' and alpha=0 the ridge penalty.
-#' @param alpha.i by default, the program use the lasso for choosing initial values of
-#' the coefficient vector. alpha.i is the elastic-net mixing parameter, with \eqn{0 \le alpha.i \le 1}. alpha.i=1 is the
-#' lasso penalty, and alpha.i=0 the ridge penalty. If assign alpha.i to be -1, program will use zero
+#' @param alpha the Elastic-Net mixing parameter, with \eqn{0 \le \alpha \le 1}. alpha=1 corresponds to the lasso penalty,
+#' and alpha=0 corresponds to the ridge penalty.
+#' @param alpha.i by default, the program uses the lasso penalty for choosing initial values of
+#' the coefficient vector. alpha.i is the Elastic-Net mixing parameter, with \eqn{0 \le alpha.i \le 1}. alpha.i=1 is the
+#' lasso penalty, and alpha.i=0 the ridge penalty. If alpha.i is assigned to be -1, the program will use zeroes
 #' as initial coefficients.
 #' @param folds the number of folds for cross-validation.
+#' @param verbo output progress to the console.
 #' @return a list with components:
 #' \item{lambda}{the optimal lambda.}
 #' \item{mcr}{the misclassification rate of the optimal lambda.}
 #' \item{MCR}{a matrix of the misclassification rates for all the values of lambda tested.}
 #'
+#' @references Zou H, Hastie T. (2005). Regularization and variable selection via the elastic net.
+#' J.R. Statist.Soc.B, 67(2):301–20.
+#'
 #' @seealso \code{\link{ElasLogistic}}
 #'
 #' @export
-CV.ElasLogistic <- function(X, Y, lambda=NULL, alpha=0.5, alpha.i=1, folds=5){
+CV.ElasLogistic <- function(X, Y, lambda=NULL, alpha=0.5, alpha.i=1, folds=5, verbo = FALSE){
 
   if(is.null(lambda)) lambda = lambda.e
   n = nrow(X); p = ncol(X);
@@ -33,7 +37,7 @@ CV.ElasLogistic <- function(X, Y, lambda=NULL, alpha=0.5, alpha.i=1, folds=5){
   tMSE = matrix(0, 1, length(lambda))
   #-------------------------------------------- Main Loop ----------------------------------------
   for(f in 1:folds){
-    cat("CrossValidation: ",f, "/", folds, "\n")
+    if(verbo) cat("CrossValidation: ",f, "/", folds, "\n")
     index = c(1: ceiling(n/folds)) + (f-1)*ceiling(n/folds)
     test = rs[intersect(index, seq(1,n,1))]
 
@@ -47,7 +51,8 @@ CV.ElasLogistic <- function(X, Y, lambda=NULL, alpha=0.5, alpha.i=1, folds=5){
     if(alpha.i != -1) b0 = initiation(x, y, alpha.i)
     n.x = nrow(x)
     for(i in 1:length(lambda)){ #Elastic net
-      b = run.elastic(x, y, lambda[i], b0, alpha, n.x, p)
+      # b = run.elastic(x, y, lambda[i], b0, alpha, n.x, p)
+      b = RunElastic(x, y, lambda[i], b0, alpha, n.x, p)
       tMSE[1,i] = tMSE[1,i] + validation(b, x2, y2, n)
     }
   }
@@ -60,28 +65,35 @@ CV.ElasLogistic <- function(X, Y, lambda=NULL, alpha=0.5, alpha.i=1, folds=5){
   return(list(lambda=lambda.opt, mcr=mcr, MCR=tMSE))
 }
 
-#' Elastic-net logistic regression for a given lambda.
+#' Elastic-Net logistic regression for a given lambda.
 #'
-#' This function makes predictions for elastic-net logistic for a given value of lambda.
+#' This function makes predictions for Elastic-Net logistic regression for a given value of lambda.
 #' Typical usage is to have the CV.ElasLogistic function compute the optimal lambda, then provide it to
 #' the ElasLogistic function.
 #'
 #' @param X a matrix of predictors.
 #' @param Y a vector of the binary response.
-#' @param lambda the tuning parameter lambda imposes sparsity.
-#' @param alpha the elasticnet mixing parameter, with \eqn{0 \le \alpha \le 1}. alpha=1 is the lasso penalty, and alpha=0 the ridge penalty.
+#' @param lambda the tuning parameter that imposes sparsity.
+#' @param alpha the Elastic-Net mixing parameter, with \eqn{0 \le \alpha \le 1}. alpha=1 is the lasso penalty, and alpha=0 the ridge penalty.
 #' @param alpha.i by default, the program use the lasso for choosing initial values of
-#' the coefficient vector. alpha.i is the elastic-net mixing parameter, with \eqn{0 \le alpha.i \le 1}. alpha.i=1 is the
-#' lasso penalty, and alpha.i=0 the ridge penalty. If assign alpha.i to be -1, program will use zero
+#' the coefficient vector. alpha.i is the Elastic-Net mixing parameter, with \eqn{0 \le alpha.i \le 1}. alpha.i=1 is the
+#' lasso penalty, and alpha.i=0 the ridge penalty. If alpha.i is assigned as -1, the program will use zeroes
 #' as initial coefficients.
 #' @param folds the number of folds for cross-validation.
 #' @return the estimated coefficients vector.
+#'
+#' @references Zou H, Hastie T. (2005). Regularization and variable selection via the elastic net.
+#' J.R. Statist.Soc.B, 67(2):301–20.
 #'
 #' @seealso \code{\link{CV.ElasLogistic}}
 #'
 #' @examples
 #' b = ElasLogistic(regnet$X, regnet$Y, 0.04)
-#' regnet$beta  # the true coefficient
+#' inds = which(regnet$beta != 0)
+#' sel = which(b != 0)
+#' tp = length(intersect(inds, sel))
+#' fp = length(sel) - tp
+#' list(tp=tp, fp=fp)
 #' @export
 ElasLogistic <- function(X, Y, lambda, alpha=0.5, alpha.i=1, folds=5){
   n = nrow(X); p = ncol(X);
@@ -89,7 +101,8 @@ ElasLogistic <- function(X, Y, lambda, alpha=0.5, alpha.i=1, folds=5){
   x = scale(x, scale = apply(x, 2, function(t) stats::sd(t)*sqrt((n-1)/n)))
   x = cbind(rep(1,n), x)
   b0 = initiation(x, y, alpha.i)
-  b = run.elastic(x, y, lambda, b0, alpha, n, p)
+  # b = run.elastic(x, y, lambda, b0, alpha, n, p)
+  b = RunElastic(x, y, lambda, b0, alpha, n, p)
 }
 
 run.elastic <- function(x, y, lambda, b, alpha, n, p){

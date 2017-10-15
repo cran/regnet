@@ -1,34 +1,39 @@
+#' @useDynLib regnet, .registration = TRUE
+#' @importFrom Rcpp sourceCpp
+NULL
+
 #' k-folds cross-validation for network-based logistic regression.
 #'
-#' This function dose k-fold cross-validation for the Network-based logistic regression and returns
+#' This function does k-fold cross-validation for the network-based logistic regression and returns
 #' a pair of lambda1 and lambda2.
 #'
 #' @param X a matrix of predictors.
 #' @param Y a vector of the binary response.
-#' @param lamb.1 a user-supplied sequence of lambda1. Tuning parameter lambda1 imposes sparsity.
+#' @param lamb.1 a user-supplied sequence of lambda1 values, which serves as a tuning parameter to impose sparsity.
 #' If it is left as NULL, a default sequence will be used.
-#' @param lamb.2 a user-supplied sequence of lambda2. Tuning parameter lambda2 controls the smoothness
-#' among coefficient profiles. If it is left as NULL, a default sequence, c(0.1, 1, 10), will be used.
-#' @param r the regularization parameter in MCP, default is 5.
-#' @param alpha.i by default, the program use the lasso for choosing initial values of
-#' the coefficient vector. alpha.i is the elastic-net mixing parameter, with \eqn{0 \le alpha.i \le 1}. alpha.i=1 is the
-#' lasso penalty, and alpha.i=0 the ridge penalty. If assign alpha.i to be -1, program will use zero
+#' @param lamb.2 a user-supplied sequence of lambda2 values, which serves as a tuning parameter to control the smoothness
+#' among coefficient profiles. If it is left as NULL, a default sequence, (0.1, 1, 10), will be used.
+#' @param r the regularization parameter in MCP; default is 5.
+#' @param alpha.i by default, the program uses the lasso for choosing initial values of
+#' the coefficient vector. alpha.i is the Elastic-Net mixing parameter, with \eqn{0 \le alpha.i \le 1}. alpha.i=1 is the
+#' lasso penalty, and alpha.i=0 the ridge penalty. If alpha.i is assigned to be -1, the program will use zeroes
 #' as initial coefficients.
-#' @param folds the number of folds for cross-validation, default is 5.
+#' @param folds the number of folds for cross-validation; default is 5.
+#' @param verbo output progress to the console.
 #' @return a list with components:
 #' \item{lambda}{the optimal pair of lambda1 and lambda2.}
 #' \item{mcr}{the misclassification rate of the optimal pair of lambda1 and lambda2.}
 #' \item{MCR}{a matrix of the misclassification rates for all pairs of lambdas tested.}
 #'
 #' @references Ren, J., He, T., Li, Y., Liu, S., Du, Y., Jiang, Y., Wu, C. (2017).
-#' Network-based regularization for high dimensional SNP data in the case – control study of
-#' Type 2 diabetes. BMC Genetics.
+#' Network-based regularization for high dimensional SNP data in the case-control study of
+#' Type 2 diabetes. BMC Genetics, 18(1):44.
 #'
 #' @seealso \code{\link{NetLogistic}}
 #'
 #' @export
 
-CV.NetLogistic <- function(X, Y, lamb.1=NULL, lamb.2=NULL, r=5, alpha.i=1, folds=5){
+CV.NetLogistic <- function(X, Y, lamb.1=NULL, lamb.2=NULL, r=5, alpha.i=1, folds=5, verbo = FALSE){
 
   if(is.null(lamb.1)) lamb.1 = lambda.n
   if(is.null(lamb.2)) lamb.2 = c(0.1, 1, 10)
@@ -40,7 +45,7 @@ CV.NetLogistic <- function(X, Y, lamb.1=NULL, lamb.2=NULL, r=5, alpha.i=1, folds
   tMSE = matrix(0, length(lamb.2), length(lamb.1))
   #---------------------------------------------- Main Loop -----------------------------------------
   for(f in 1:folds){
-    cat("CrossValidation: ",f, "/", folds, "\n")
+    if(verbo) cat("CrossValidation: ",f, "/", folds, "\n")
     index = c(1: ceiling(n/folds)) + (f-1)*ceiling(n/folds)
     test = rs[intersect(index, seq(1,n,1))]
 
@@ -58,10 +63,12 @@ CV.NetLogistic <- function(X, Y, lamb.1=NULL, lamb.2=NULL, r=5, alpha.i=1, folds
 
     for(j in 1:length(lamb.2)){
       for(i in 1:length(lamb.1)){ # Network
-        b = run.net(x, y, lamb.1[i], lamb.2[j], b0, r, a, n.x, p)
+        # b = run.net(x, y, lamb.1[i], lamb.2[j], b0, r, a, n.x, p)
+        b = RunNet(x, y, lamb.1[i], lamb.2[j], b0, r, a, n.x, p)
         tMSE[j,i] = tMSE[j,i] + validation(b, x2, y2, n)
       }
     }
+    # tMSE = RunNet_Grid(x, y, x2, y2, lamb.1, lamb.2, b0, r, a, n.x, p)
   }
   mcr = min(tMSE)
   inds = which(tMSE == mcr, arr.ind=TRUE)
@@ -73,33 +80,37 @@ CV.NetLogistic <- function(X, Y, lamb.1=NULL, lamb.2=NULL, r=5, alpha.i=1, folds
   return(list(lambda=lambda, mcr=mcr, MCR=tMSE))
 }
 
-#' Network-based logistic regression for given lambda1 and lambda2.
+#' Network-based logistic regression for given lambda1 and lambda2 pair.
 #'
-#' This function makes predictions for network-based logistic for a given pair of lambda1 and lambda2.
-#' Typical usage is to have the CV.NetLogistic function compute the optimal lambdas, then provide them to
+#' This function makes predictions for network-based logistic regression for a given pair of lambda1 and lambda2 values.
+#' Typical usage is to have the CV.NetLogistic function compute the optimal lambdas, then provide them to the
 #' NetLogistic function.
 #'
 #' @param X a matrix of predictors.
 #' @param Y a vector of the binary response.
-#' @param lamb.1 the tuning parameter lambda1 imposes sparsity.
-#' @param lamb.2 the tuning parameter lambda2 controls the smoothness among coefficient profiles.
-#' @param alpha.i by default, the program use the elastic-net for choosing initial values of
-#' the coefficient vector. alpha.i is the elastic-net mixing parameter, with \eqn{0 \le alpha.i \le 1}. alpha.i=1 is the
-#' lasso penalty, and alpha.i=0 the ridge penalty. If assign alpha.i to be -1, program will use zero
+#' @param lamb.1 the tuning parameter (lambda1) that imposes sparsity.
+#' @param lamb.2 the tuning parameter (lambda2) that controls the smoothness among coefficient profiles.
+#' @param alpha.i by default, the program uses Elastic-Net for choosing initial values of
+#' the coefficient vector. alpha.i is the Elastic-Net mixing parameter, with \eqn{0 \le alpha.i \le 1}. alpha.i=1 is the
+#' lasso penalty, and alpha.i=0 is the ridge penalty. If alpha.i is assigned to be -1, the program will use zeroes
 #' as initial coefficients.
 #' @param r the regularization parameter in MCP.
 #' @param folds the number of folds for cross-validation.
 #' @return the estimated coefficients vector.
 #'
 #' @references Ren, J., He, T., Li, Y., Liu, S., Du, Y., Jiang, Y., Wu, C. (2017).
-#' Network-based regularization for high dimensional SNP data in the case – control study of
-#' Type 2 diabetes. BMC Genetics.
+#' Network-based regularization for high dimensional SNP data in the case-control study of
+#' Type 2 diabetes. BMC Genetics, 18(1):44.
 #'
 #' @seealso \code{\link{CV.NetLogistic}}
 #'
 #' @examples
 #' b = NetLogistic(regnet$X, regnet$Y, 0.05, 1)
-#' regnet$beta
+#' inds = which(regnet$beta != 0)
+#' sel = which(b != 0)
+#' tp = length(intersect(inds, sel))
+#' fp = length(sel) - tp
+#' list(tp=tp, fp=fp)
 #' @export
 
 NetLogistic <- function(X, Y, lamb.1, lamb.2, alpha.i=1, r=5, folds=5){
@@ -110,7 +121,24 @@ NetLogistic <- function(X, Y, lamb.1, lamb.2, alpha.i=1, r=5, folds=5){
   x = cbind(rep(1,n), x)
   if(alpha.i != -1) b0 = initiation(x, y, alpha.i)
   else b0 = rep(0, p+1)
-  b = run.net(x, y, lamb.1, lamb.2, b0, r, a, n, p)
+  # b = run.net(x, y, lamb.1, lamb.2, b0, r, a, n, p)
+  b = RunNet(x, y, lamb.1, lamb.2, b0, r, a, n, p)
+}
+
+
+Adjacency = function(x, alpha=5)
+{
+  n = nrow(x)
+  p = ncol(x)
+  r0 = stats::cor(x)
+  r = r0; r[which(r==1)] = 1 - 0.01
+  z = 0.5*log((1+r[upper.tri(r)])/(1-r[upper.tri(r)]))
+  c0 = mean(sqrt(n-3)*z) + 2*stats::sd(sqrt(n-3)*z)
+  cutoff = (exp(2*c0/sqrt(n-3))-1)/(exp(2*c0/sqrt(n-3))+1)
+  r = r0
+  A = (r)^alpha*(abs(r)>cutoff)
+  diag(A) = 0
+  A
 }
 
 run.net <- function(x, y, lam1, lam2, b, r, a, n, p){
@@ -147,4 +175,3 @@ Network <- function(x, y, lam1, lam2, b, r, a, n, p){
   }
   b
 }
-
