@@ -1,9 +1,9 @@
-#' print a cv.glmnet object
+#' print a cv.regnet object
 #'
-#' Print a summary of a cv.glmnet object
+#' Print a summary of a cv.regnet object
 #'
-#' @param x cv.glmnet object.
-#' @param digits significant digits in printout.
+#' @param x a cv.regnet object.
+#' @param digits significant digits in the printout.
 #' @param ... other print arguments
 #' @usage \method{print}{cv.regnet}(x, digits = max(3, getOption("digits") - 3), \dots)
 #' @seealso \code{\link{cv.regnet}}
@@ -11,11 +11,31 @@
 print.cv.regnet=function(x, digits = max(3, getOption("digits") - 3),...){
   cat("\nCall: ", deparse(x$call), "\n")
   cat("\nLambda:\n")
-  print(x$lambda)
+  print(x$lambda, digits)
   cat("\nCV error:\n")
-  print(x$mcvm)
+  print(x$mcvm, digits)
   cat("\nPenalty:\n")
   print(x$penalty)
 
   # print(cbind(Df=x$df,"%Dev"=signif(x$dev.ratio,digits),Lambda=signif(x$lambda,digits)))
+}
+
+
+
+#' print a regnet object
+#'
+#' Print a summary of a regnet object
+#'
+#' @param x a regnet object.
+#' @param digits significant digits in the printout.
+#' @param ... other print arguments
+#' @usage \method{print}{regnet}(x, digits = max(3, getOption("digits") - 3), \dots)
+#' @seealso \code{\link{regnet}}
+#' @export
+print.regnet=function(x, digits = max(3, getOption("digits") - 3),...){
+  cat("\nCall: ", deparse(x$call), "\n")
+  cat("\nCoefficients:\n")
+  print(x$coeff, digits)
+  cat("Class:\n")
+  print(class(x))
 }
