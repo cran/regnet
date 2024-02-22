@@ -1,4 +1,4 @@
-05a1837313a889782a3dc72411dfb75d *DESCRIPTION
+41f27723e11451c291ce7f14853fd64c *DESCRIPTION
 4093b82268bf6970a18bcd7477fbb07b *NAMESPACE
 20941c421c14501d7f5ccd24c88c5897 *NEWS.md
 2cc671a5093d5900555ffa22b4cb8e61 *R/ContCD.R
@@ -13,10 +13,10 @@ f0bff5349a9fe50108cc66fe287722c8 *R/cv.regnet.R
 56b7240733c5c998d1332364f5ced78b *R/example.R
 4befc747b66ae1dd768992bb1bbef05e *R/plot.regnet.R
 322b32e0781448ca70b4c79c2ff8a4c2 *R/print.regnet.R
-7f1db4887f892a111b444e8532a3d694 *R/regnet-package.R
-074bec4993e6b03e617c90e993310a4c *R/regnet.R
-37e35346c1223028fb03105a8d3a12bd *README.md
-afbe4209b3bb961ba3e41cbfe79ea507 *build/partial.rdb
+11a4ac00ce874ae64f67bfe750841fb3 *R/regnet-package.R
+619258f584e8ef6466b1b0783e847614 *R/regnet.R
+11a0f66c399a666dc9370428d8fe3d1c *README.md
+b943a1546a1e17be4eea235ec7b4616b *build/partial.rdb
 d099e7ae086be6d43d50edb0ee336dd4 *data/ContExample.rda
 ad1a44bc07f2f27aa369bd7f4bf4f569 *data/HeteroExample.rda
 51d9f3080e26f9e4788d472565f0724d *data/LogisticExample.rda
@@ -25,8 +25,8 @@ ad1a44bc07f2f27aa369bd7f4bf4f569 *data/HeteroExample.rda
 e594b8a8c80c43fb31a8f9942aa3178e *man/plot.regnet.Rd
 5b71b0d41d6d8c5229bd249a6124538c *man/print.cv.regnet.Rd
 61c331359acab61213d8b7132739e4d2 *man/print.regnet.Rd
-07b54a36e5f5cd9d506f2bc7a9712754 *man/regnet-package.Rd
-e5eb4281f458ef8a73ee389a42cd2bbd *man/regnet.Rd
+92a8167bda123f00098ae785efd1da3f *man/regnet-package.Rd
+7fc59ff6d752bdf66276848da51d3896 *man/regnet.Rd
 5477f3ecf9cfb074eecd705aae84ef20 *man/rgn.Rd
 8630edc272281fc041ea24bff48306b6 *src/ContCD.cpp
 3acff573ccfc12746fe7f9296922e21d *src/ContCD.h
@@ -34,8 +34,8 @@ cc0e73e998c8859724bd53e49a534352 *src/ContGrid.cpp
 aa18909bac64d147152ee95d91da1f7e *src/LogitCD.cpp
 beba45ccebf8748ce9d58087175a10ad *src/LogitCD.h
 8e90e143b97bce5ab7eb43b961269cad *src/LogitGrid.cpp
-61059660eb073d93e00e8ee054237071 *src/Makevars
-61059660eb073d93e00e8ee054237071 *src/Makevars.win
+d2773de8a526eba651ace8a09e431abb *src/Makevars
+d2773de8a526eba651ace8a09e431abb *src/Makevars.win
 31329446d5afe30b6809dc58eb6c30ad *src/QR.cpp
 e7078fcc50e33dfb3aff43e7c809b0d8 *src/QR.h
 47cdd232a1080a09d02b3cb282df11e4 *src/RcppExports.cpp
