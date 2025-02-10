@@ -38,7 +38,7 @@ available for continuous and survival responses.
 <!-- -->
 
     install.packages("devtools")
-    devtools::install_github("jrhub/regnet")
+    devtools::install_github("jrhub/regnet") #v1.0.2
 
 - Released versions of regnet are available on CRAN
   [(link)](https://cran.r-project.org/package=regnet), and can be
@@ -108,6 +108,11 @@ available for continuous and survival responses.
 ![](README-unnamed-chunk-2-2.png)<!-- -->
 
 ## News
+
+### regnet 1.0.2 \[2025-2-9\]
+
+- Bug Fix: Fixed a bug in the C++ function `QRWMR`.
+- Maintenance: Updated Maintainer email.
 
 ### regnet 1.0.0 \[2022-8\]
 
